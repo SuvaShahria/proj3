@@ -44,6 +44,50 @@ emitComment(char *comment)
 /*
  * emit implements CSE
  */
+static 
+SymTabEntry **HashTable;
+
+static
+int hash(char *name) {
+  int i;
+  int hashValue = 1;
+  
+  for (i=0; i < strlen(name); i++) {
+    hashValue = (hashValue * name[i]) % HASH_TABLE_SIZE;
+  }
+
+  return hashValue;
+}
+
+
+void
+InitSymbolTable() {
+  int i;
+  int dummy;
+
+  HashTable = (SymTabEntry **) malloc (sizeof(SymTabEntry *) * HASH_TABLE_SIZE);
+  for (i=0; i < HASH_TABLE_SIZE; i++)
+    HashTable[i] = NULL;
+}
+
+
+/* Returns pointer to symbol table entry, if entry is found */
+/* Otherwise, NULL is returned */
+SymTabEntry * 
+lookup(char *name) {
+  int currentIndex;
+  int visitedSlots = 0;
+  
+  currentIndex = hash(name);
+  while (HashTable[currentIndex] != NULL && visitedSlots < HASH_TABLE_SIZE) {
+    if (!strcmp(HashTable[currentIndex]->name, name) )
+      return HashTable[currentIndex];
+    currentIndex = (currentIndex + 1) % HASH_TABLE_SIZE; 
+    visitedSlots++;
+  }
+  return NULL;
+}
+
 
 int
 emit(int label_index,
